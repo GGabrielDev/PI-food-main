@@ -29,11 +29,6 @@ describe("Recipe model", () => {
         const test1 = await Recipe.create(testObject);
         expect(test1.id).to.not.be.undefined;
       });
-      it("should return with a 'local' string attached to the start when read", async () => {
-        const test1 = await Recipe.create(testObject);
-        const testString = test1.id.slice(0, 5);
-        expect(testString).to.equal("local");
-      });
       it("should increment the id each time a recipe is created", async () => {
         const test1 = await Recipe.create(testObject);
         const test2 = await Recipe.create(testObject);
@@ -73,6 +68,12 @@ describe("Recipe model", () => {
       it("should be declared properly if argument is passed", async () => {
         const test1 = await Recipe.create(testObject);
         expect(test1.steps).to.exist;
+      });
+    });
+    describe("isLocal", () => {
+      it("should be declared proprely if argument is passed", async () => {
+        const test1 = await Recipe.create({ ...testObject, isLocal: true });
+        expect(test1.isLocal).to.equal(true);
       });
     });
   });
