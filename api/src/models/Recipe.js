@@ -25,6 +25,9 @@ module.exports = (sequelize) => {
       steps: {
         type: DataTypes.ARRAY(DataTypes.STRING),
       },
+      image: {
+        type: DataTypes.STRING,
+      },
       isLocal: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,

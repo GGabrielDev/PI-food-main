@@ -70,6 +70,15 @@ describe("Recipe model", () => {
         expect(test1.steps).to.exist;
       });
     });
+    describe("image", () => {
+      it("should be declaered properly if argument is passed", async () => {
+        const test1 = await Recipe.create({
+          ...testObject,
+          image: "https://imgur.com/funny",
+        });
+        expect(test1.image).to.exist;
+      });
+    });
     describe("isLocal", () => {
       it("should be declared proprely if argument is passed", async () => {
         const test1 = await Recipe.create({ ...testObject, isLocal: true });

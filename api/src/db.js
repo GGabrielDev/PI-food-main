@@ -75,8 +75,32 @@ const Recipe_Diets = sequelize.define(
 Recipe.belongsToMany(Diet, { through: Recipe_Diets });
 Diet.belongsToMany(Recipe, { through: Recipe_Diets });
 
+// Aqui el programa revisa si las dietas estan cargadas en la DB, sino, las carga.
+const dietCreator = () => {
+  const dietArray = [
+    "gluten free",
+    "dairy free",
+    "ketogenic",
+    "vegetarian",
+    "lacto ovo vegetarian",
+    "vegan",
+    "pescatarian",
+    "paleolithic",
+    "primal",
+    "low fodmap",
+    "whole 30",
+  ];
+  dietArray.forEach(async (dietName) => {
+    const diet = await Diet.findOne({ where: { name: dietName } });
+    if (diet === null) {
+      await Diet.create({ name: dietName });
+    }
+  });
+};
+
 module.exports = {
   ...sequelize.models, // para poder importar los modelos así: const { Product, User } = require('./db.js');
   conn: sequelize, // para importart la conexión { conn } = require('./db.js');
   checkConnection,
+  dietCreator,
 };
