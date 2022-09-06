@@ -5,16 +5,18 @@ const app = require("../../src/app.js");
 const { Recipe, Diet, conn } = require("../../src/db.js");
 
 const agent = session(app);
+
+const diet = {
+  name: "gluten free",
+};
+
 const recipe = {
   name: "Cauliflower a la napolitana",
   summary: "A test description",
   healthScore: 10.1,
   steps: ["Test1", "Test2", "Test3"],
   isLocal: true,
-};
-
-const diet = {
-  name: "gluten free",
+  diets: [diet],
 };
 
 const testRecipe = {
@@ -81,11 +83,10 @@ describe("Recipe routes", function () {
         });
     });
   });
-  describe.only("GET /recipes/{recipeId}", () => {
+  describe("GET /recipes/{recipeId}", () => {
     it("should get a 404 and \"The given ID doesn't exist\" as an error message if the given ID doesn't belong to any recipe", (done) => {
       agent
-        .get("/recipes/999")
-        .send({ isLocal: true })
+        .get("/recipes/999?isLocal=true")
         .expect(404)
         .end(function (err, res) {
           if (res.text === "The given ID doesn't exist") {
@@ -102,7 +103,7 @@ describe("Recipe routes", function () {
         .end(function (err, res) {
           if (
             res.text ===
-            "The parameter 'isLocal' was not sent in the request body"
+            "The parameter 'isLocal' was not sent in the request query"
           ) {
             done();
           } else {
@@ -112,8 +113,7 @@ describe("Recipe routes", function () {
     });
     it("should return an array of the diets that the recipe has alongside with the rest of the optional info", (done) => {
       agent
-        .get("/recipes/1")
-        .send({ isLocal: true })
+        .get("/recipes/1?isLocal=true")
         .expect(200)
         .set("Accept", "application/json")
         .expect("Content-Type", /json/)
@@ -130,8 +130,7 @@ describe("Recipe routes", function () {
     });
     it("should return a recipe with all the info when the recipe is not local", (done) => {
       agent
-        .get("/recipe/10001")
-        .send({ isLocal: false })
+        .get("/recipes/10001?isLocal=false")
         .expect(200)
         .set("Accept", "application/json")
         .expect("Content-Type", /json/)
@@ -141,31 +140,41 @@ describe("Recipe routes", function () {
           } else {
             expect(res.body.healthScore).to.be.a("number");
             expect(res.body.steps).to.be.an("array");
-            expect(res.body.diets).to.be.an("array").and.to.have.lengthOf(1);
+            expect(res.body.diets).to.be.an("array");
             done();
           }
         });
     });
   });
-  describe("POST /recipes", () => {
+  describe.only("POST /recipes", () => {
     it('should get a 400 and "The request is missing properties" as message if any of the required entries is missing', (done) => {
       agent
         .post("/recipes")
         .send({ name: "Test name" })
         .expect(400)
         .end(function (err, res) {
-          if (res.text === "The request is missing properties") done();
-          done(new Error("Should return an error message."));
+          if (res.text === "The request is missing properties") {
+            done();
+          } else {
+            done(new Error("Should return an error message."));
+          }
         });
     });
-    it("should return 200 and a response message if the recipe was successfully created", (done) => {
+    it("should return 201 and the new recipe if the recipe was successfully created", (done) => {
       agent
         .post("/recipes")
         .send(recipe)
-        .expect(200)
-        .end(function (res) {
-          if (res.text === "The recipe was created successfully") done();
-          done(new Error("Should return a response message"));
+        .expect(201)
+        .end(function (err, res) {
+          if (err) {
+            done(new Error(`Something wrong happened: ${err}`));
+          } else {
+            expect(res.body).to.have.property("id");
+            expect(res.body.name).to.eql(recipe.name);
+            expect(res.body.summary).to.eql(recipe.summary);
+            expect(res.body.steps).to.be.an("array");
+            done();
+          }
         });
     });
   });

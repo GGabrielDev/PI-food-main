@@ -2,56 +2,14 @@ const { Router } = require("express");
 const { Op } = require("sequelize");
 const axios = require("axios");
 const { Recipe, Diet } = require("../db");
-const { API_KEY3 } = process.env;
+const {
+  singleApiFormat,
+  formatApiToDbArray,
+  filterApiResult,
+} = require("../helpers/routeHelper");
+const { API_KEY } = process.env;
 
 const router = Router();
-
-const apiToDbFormat = (apiArray, details = false) => {
-  return apiArray.map((apiObject) => {
-    let apiSteps = [];
-    let apiDiets = [];
-    let basicRecipe = {
-      id: apiObject.id,
-      name: apiObject.title,
-      summary: apiObject.summary,
-      image: apiObject.image,
-      isLocal: false,
-    };
-
-    if (apiObject.analyzedInstructions.length > 0) {
-      apiSteps = apiObject.analyzedInstructions[0].steps.map(
-        (step) => step.step
-      );
-    }
-
-    if (apiObject.vegetarian) apiDiets.push({ name: "vegetarian" });
-    if (apiObject.lowFodmap) apiDiets.push({ name: "low fodmap" });
-
-    return Recipe.build(
-      {
-        ...basicRecipe,
-        ...(details
-          ? {
-              healthScore: apiObject.healthScore,
-              steps: apiSteps,
-            }
-          : {}),
-        diets: apiDiets.concat(
-          apiObject.diets.map((diet) => {
-            return { name: diet };
-          })
-        ),
-      },
-      { include: [Diet] }
-    );
-  });
-};
-
-const filterApiResult = (apiArray, term) => {
-  return apiArray.filter(
-    (object) => object.name.toLowerCase().indexOf(term.toLowerCase()) !== -1
-  );
-};
 
 router.get("/", async (req, res) => {
   const { name } = req.query;
@@ -72,15 +30,76 @@ router.get("/", async (req, res) => {
         params: {
           number: 10,
           addRecipeInformation: true,
-          apiKey: API_KEY3,
+          apiKey: API_KEY,
         },
       }
     );
     const apiResults = filterApiResult(
-      apiToDbFormat(apiResponse.data.results),
+      formatApiToDbArray(apiResponse.data.results),
       name
     );
     return res.status(200).json([...dbResults, ...apiResults]);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(error);
+  }
+});
+
+router.get("/:recipeId", async (req, res) => {
+  const { recipeId } = req.params;
+  const { isLocal } = req.query;
+
+  if (!(isLocal === "true" || isLocal === "false"))
+    return res
+      .status(400)
+      .send("The parameter 'isLocal' was not sent in the request query");
+  try {
+    let result = {};
+    if (isLocal === "true") {
+      result = await Recipe.findOne({ where: { id: recipeId }, include: Diet });
+      if (result === null)
+        return res.status(404).send("The given ID doesn't exist");
+    }
+    if (isLocal === "false") {
+      const apiResult = await axios.get(
+        `https://api.spoonacular.com/recipes/${recipeId}/information`,
+        {
+          params: {
+            apiKey: API_KEY,
+          },
+        }
+      );
+      result = singleApiFormat(apiResult.data);
+    }
+    return res.status(200).json(result);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(error);
+  }
+});
+
+router.post("/", async (req, res) => {
+  console.log(req.body);
+  const { name, summary, healthScore, steps, image, diets } = req.body;
+
+  if (name === undefined || summary === undefined || diets === undefined)
+    return res.status(400).send("The request is missing properties");
+  try {
+    const result = await Recipe.create(
+      {
+        name,
+        summary,
+        healthScore,
+        steps,
+        image,
+        isLocal: true,
+        diets,
+      },
+      {
+        include: [Diet],
+      }
+    );
+    return res.status(201).json(result);
   } catch (error) {
     console.log(error);
     return res.status(500).json(error);
