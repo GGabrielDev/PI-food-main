@@ -45,6 +45,30 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/startup", async (req, res) => {
+  try {
+    const dbResults = await Recipe.findAll({
+      attributes: ["id", "name", "summary", "image", "isLocal"],
+    });
+    const apiResponse = await axios.get(
+      "https://api.spoonacular.com/recipes/complexSearch",
+      {
+        params: {
+          number: 100,
+          addRecipeInformation: true,
+          apiKey: API_KEY,
+        },
+      }
+    );
+    const apiResults = formatApiToDbArray(apiResponse.data.results);
+    console.log([...dbResults, ...apiResults].length);
+    return res.status(200).json([...dbResults, ...apiResults]);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(error);
+  }
+});
+
 router.get("/:recipeId", async (req, res) => {
   const { recipeId } = req.params;
   const { isLocal } = req.query;
