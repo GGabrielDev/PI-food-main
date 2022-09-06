@@ -146,7 +146,7 @@ describe("Recipe routes", function () {
         });
     });
   });
-  describe.only("POST /recipes", () => {
+  describe("POST /recipes", () => {
     it('should get a 400 and "The request is missing properties" as message if any of the required entries is missing', (done) => {
       agent
         .post("/recipes")
@@ -184,8 +184,12 @@ describe("Recipe routes", function () {
         .get("/diets")
         .expect(200)
         .end(function (err, res) {
-          if (err) done(new Error(`Something wrong happened: ${err}`));
-          expect(res.body).to.be.an("array");
+          if (err) {
+            done(new Error(`Something wrong happened: ${err}`));
+          } else {
+            expect(res.body).to.be.an("array");
+            done();
+          }
         });
     });
   });

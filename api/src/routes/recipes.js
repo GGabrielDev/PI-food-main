@@ -28,7 +28,7 @@ router.get("/", async (req, res) => {
       "https://api.spoonacular.com/recipes/complexSearch",
       {
         params: {
-          number: 10,
+          number: 100,
           addRecipeInformation: true,
           apiKey: API_KEY,
         },
@@ -79,7 +79,6 @@ router.get("/:recipeId", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-  console.log(req.body);
   const { name, summary, healthScore, steps, image, diets } = req.body;
 
   if (name === undefined || summary === undefined || diets === undefined)
