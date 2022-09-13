@@ -63,5 +63,6 @@ export const { filterByName, selectDetails, clearDetails } =
 
 export const selectRecipes = (state) => state.recipes.recipes;
 export const selectDiets = (state) => state.recipes.diets;
+export const selectStatus = (state) => state.recipes.status;
 
 export default recipesSlice.reducer;
