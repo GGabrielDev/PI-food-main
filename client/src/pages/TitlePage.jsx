@@ -26,7 +26,7 @@ const TitlePage = () => {
         {status === "loading" ? (
           <Spinner />
         ) : (
-          <TitleButton>Start Here</TitleButton>
+          <TitleButton to="/dashboard">Start Here</TitleButton>
         )}
       </TitleDetails>
     </TitleFrame>

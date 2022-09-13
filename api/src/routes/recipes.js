@@ -7,7 +7,9 @@ const {
   formatApiToDbArray,
   filterApiResult,
 } = require("../helpers/routeHelper");
-const { API_KEY } = process.env;
+const { API_KEY7 } = process.env;
+
+const recipesDummy = require("./recipesDummy.json");
 
 const router = Router();
 
@@ -24,16 +26,19 @@ router.get("/", async (req, res) => {
         },
       },
     });
+    const apiResponse = recipesDummy;
+    /*
     const apiResponse = await axios.get(
       "https://api.spoonacular.com/recipes/complexSearch",
       {
         params: {
           number: 100,
           addRecipeInformation: true,
-          apiKey: API_KEY,
+          apiKey: API_KEY7,
         },
       }
-    );
+		);
+		*/
     const apiResults = filterApiResult(
       formatApiToDbArray(apiResponse.data.results),
       name
@@ -50,16 +55,19 @@ router.get("/startup", async (req, res) => {
     const dbResults = await Recipe.findAll({
       attributes: ["id", "name", "summary", "image", "isLocal"],
     });
+    const apiResponse = recipesDummy;
+    /*
     const apiResponse = await axios.get(
       "https://api.spoonacular.com/recipes/complexSearch",
       {
         params: {
           number: 100,
           addRecipeInformation: true,
-          apiKey: API_KEY,
+          apiKey: API_KEY7,
         },
       }
-    );
+		);
+		*/
     const apiResults = formatApiToDbArray(apiResponse.data.results);
     console.log([...dbResults, ...apiResults].length);
     return res.status(200).json([...dbResults, ...apiResults]);
@@ -89,7 +97,7 @@ router.get("/:recipeId", async (req, res) => {
         `https://api.spoonacular.com/recipes/${recipeId}/information`,
         {
           params: {
-            apiKey: API_KEY,
+            apiKey: API_KEY7,
           },
         }
       );

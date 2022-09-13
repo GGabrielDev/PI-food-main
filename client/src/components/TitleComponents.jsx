@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { Link } from "react-router-dom";
 import titleBg from "../assets/title-bg.jpeg";
 
 export const TitleFrame = styled.div`
@@ -49,7 +50,7 @@ export const TitleText = styled.h1`
   color: ${(props) => props.theme.primary};
 `;
 
-export const TitleButton = styled.button`
+export const TitleButton = styled(Link)`
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -70,6 +71,7 @@ export const TitleButton = styled.button`
   font-style: normal;
   font-weight: 700;
   font-size: 24px;
+  text-decoration: none;
   line-height: 33px;
   color: white;
 

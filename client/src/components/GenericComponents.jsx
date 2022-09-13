@@ -11,6 +11,8 @@ export const AppFrame = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 10px;
+  box-shadow: -5px 5px 10px 5px rgba(0, 0, 0, 0.5);
 `;
 
 const SpinnerKeyframes = keyframes`
@@ -30,4 +32,12 @@ export const Spinner = styled.div`
   border-radius: 50%;
 
   transition: ease 0.5s;
+`;
+
+export const DashboardFrame = styled.div`
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+
+  background-color: ${(props) => props.theme.secondary};
 `;
